@@ -949,8 +949,8 @@ public:
   // - relocInfo::none
   // In the case of a far call/jump, the entry address is put in the tmp register.
   // The tmp register is invalidated.
-  void far_call(Address entry, CodeBuffer *cbuf = NULL, Register tmp = t0);
-  void far_jump(Address entry, CodeBuffer *cbuf = NULL, Register tmp = t0);
+  void far_call(Address entry, Register tmp = t0);
+  void far_jump(Address entry, Register tmp = t0);
 
   static int far_branch_size() {
     if (far_branches()) {
@@ -1051,7 +1051,7 @@ public:
   // - relocInfo::virtual_call_type
   //
   // Return: the call PC or NULL if CodeCache is full.
-  address trampoline_call(Address entry, CodeBuffer* cbuf = NULL);
+  address trampoline_call(Address entry);
   address ic_call(address entry, jint method_index = 0);
 
   // Support for memory inc/dec
