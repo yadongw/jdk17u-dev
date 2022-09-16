@@ -2769,7 +2769,7 @@ ATOMIC_XCHGU(xchgalwu, xchgalw)
 
 #undef ATOMIC_XCHGU
 
-void MacroAssembler::far_jump(Address entry, CodeBuffer *cbuf, Register tmp) {
+void MacroAssembler::far_jump(Address entry, Register tmp) {
   assert(ReservedCodeCacheSize < 4*G, "branch out of range");
   assert(CodeCache::find_blob(entry.target()) != NULL,
          "destination of far call not found in code cache");
@@ -2786,12 +2786,11 @@ void MacroAssembler::far_jump(Address entry, CodeBuffer *cbuf, Register tmp) {
       jalr(x0, tmp, offset);
     });
   } else {
-    if (cbuf != NULL) { cbuf->set_insts_mark(); }
     j(entry);
   }
 }
 
-void MacroAssembler::far_call(Address entry, CodeBuffer *cbuf, Register tmp) {
+void MacroAssembler::far_call(Address entry, Register tmp) {
   assert(ReservedCodeCacheSize < 4*G, "branch out of range");
   assert(CodeCache::find_blob(entry.target()) != NULL,
          "destination of far call not found in code cache");
@@ -2808,7 +2807,6 @@ void MacroAssembler::far_call(Address entry, CodeBuffer *cbuf, Register tmp) {
       jalr(x1, tmp, offset); // link
     });
   } else {
-    if (cbuf != NULL) { cbuf->set_insts_mark(); }
     jal(entry); // link
   }
 }
@@ -3379,7 +3377,7 @@ void  MacroAssembler::set_narrow_klass(Register dst, Klass* k) {
 
 // Maybe emit a call via a trampoline.  If the code cache is small
 // trampolines won't be emitted.
-address MacroAssembler::trampoline_call(Address entry, CodeBuffer* cbuf) {
+address MacroAssembler::trampoline_call(Address entry) {
   assert(JavaThread::current()->is_Compiler_thread(), "just checking");
   assert(entry.rspec().type() == relocInfo::runtime_call_type ||
          entry.rspec().type() == relocInfo::opt_virtual_call_type ||
