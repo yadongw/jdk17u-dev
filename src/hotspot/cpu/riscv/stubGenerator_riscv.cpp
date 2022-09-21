@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2014, 2020, Red Hat Inc. All rights reserved.
  * Copyright (c) 2020, 2022, Huawei Technologies Co., Ltd. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -1086,7 +1086,7 @@ class StubGenerator: public StubCodeGenerator {
   //
   // If 'from' and/or 'to' are aligned on 4-byte boundaries, we let
   // the hardware handle it.  The two dwords within qwords that span
-  // cache line boundaries will still be loaded and stored atomicly.
+  // cache line boundaries will still be loaded and stored atomically.
   //
   // Side Effects:
   //   disjoint_int_copy_entry is set to the no-overlap entry point
@@ -1158,7 +1158,7 @@ class StubGenerator: public StubCodeGenerator {
   //
   // If 'from' and/or 'to' are aligned on 4-byte boundaries, we let
   // the hardware handle it.  The two dwords within qwords that span
-  // cache line boundaries will still be loaded and stored atomicly.
+  // cache line boundaries will still be loaded and stored atomically.
   //
   address generate_conjoint_copy(size_t size, bool aligned, bool is_oop, address nooverlap_target,
                                  address* entry, const char* name,
@@ -1326,7 +1326,7 @@ class StubGenerator: public StubCodeGenerator {
   //
   // If 'from' and/or 'to' are aligned on 4-byte boundaries, we let
   // the hardware handle it.  The two dwords within qwords that span
-  // cache line boundaries will still be loaded and stored atomicly.
+  // cache line boundaries will still be loaded and stored atomically.
   //
   // Side Effects:
   //   disjoint_int_copy_entry is set to the no-overlap entry point
@@ -1350,7 +1350,7 @@ class StubGenerator: public StubCodeGenerator {
   //
   // If 'from' and/or 'to' are aligned on 4-byte boundaries, we let
   // the hardware handle it.  The two dwords within qwords that span
-  // cache line boundaries will still be loaded and stored atomicly.
+  // cache line boundaries will still be loaded and stored atomically.
   //
   address generate_conjoint_int_copy(bool aligned, address nooverlap_target,
                                      address* entry, const char* name,
