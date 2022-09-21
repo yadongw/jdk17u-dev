@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2014, 2020, Red Hat Inc. All rights reserved.
  * Copyright (c) 2020, 2022, Huawei Technologies Co., Ltd. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -379,7 +379,10 @@ void MacroAssembler::verify_oop(Register reg, const char* s) {
   push_reg(RegSet::of(ra, t0, t1, c_rarg0), sp);
 
   mv(c_rarg0, reg); // c_rarg0 : x10
-  li(t0, (uintptr_t)(address)b);
+  // The length of the instruction sequence emitted should be independent
+  // of the value of the local char buffer address so that the size of mach
+  // nodes for scratch emit and normal emit matches.
+  mv(t0, (address)b);
 
   // call indirectly to solve generation ordering problem
   int32_t offset = 0;
@@ -415,7 +418,10 @@ void MacroAssembler::verify_oop_addr(Address addr, const char* s) {
     ld(x10, addr);
   }
 
-  li(t0, (uintptr_t)(address)b);
+  // The length of the instruction sequence emitted should be independent
+  // of the value of the local char buffer address so that the size of mach
+  // nodes for scratch emit and normal emit matches.
+  mv(t0, (uintptr_t)(address)b);
 
   // call indirectly to solve generation ordering problem
   int32_t offset = 0;
@@ -1382,7 +1388,7 @@ void MacroAssembler::mv(Register Rd, Address dest) {
 }
 
 void MacroAssembler::mv(Register Rd, address addr) {
-  // Here in case of use with relocation, use fix length instruciton
+  // Here in case of use with relocation, use fix length instruction
   // movptr instead of li
   movptr(Rd, addr);
 }
@@ -2098,7 +2104,7 @@ void MacroAssembler::lookup_interface_method(Register recv_klass,
   beq(intf_klass, method_result, found_method);
   bind(search);
   // Check that the previous entry is non-null. A null entry means that
-  // the receiver class doens't implement the interface, and wasn't the
+  // the receiver class doesn't implement the interface, and wasn't the
   // same as when the caller was compiled.
   beqz(method_result, L_no_such_interface, /* is_far */ true);
   addi(scan_tmp, scan_tmp, scan_step);
@@ -2154,9 +2160,9 @@ void MacroAssembler::membar(uint32_t order_constraint) {
   }
 }
 
-// Form an addres from base + offset in Rd. Rd my or may not
+// Form an address from base + offset in Rd. Rd my or may not
 // actually be used: you must use the Address that is returned. It
-// is up to you to ensure that the shift provided mathces the size
+// is up to you to ensure that the shift provided matches the size
 // of your data.
 Address MacroAssembler::form_address(Register Rd, Register base, long byte_offset) {
   if (is_offset_in_range(byte_offset, 12)) { // 12: imm in range 2^12
@@ -2542,7 +2548,7 @@ void MacroAssembler::check_klass_subtype_fast_path(Register sub_klass,
   // This self-check enables sharing of secondary supertype arrays among
   // non-primary types such as array-of-interface. Otherwise, each such
   // type would need its own customized SSA.
-  // We move this check to the front fo the fast path because many
+  // We move this check to the front of the fast path because many
   // type checks are in fact trivially successful in this manner,
   // so we get a nicely predicted branch right at the start of the check.
   beq(sub_klass, super_klass, *L_success);
@@ -2556,11 +2562,11 @@ void MacroAssembler::check_klass_subtype_fast_path(Register sub_klass,
   Address super_check_addr(t0);
   ld(t0, super_check_addr); // load displayed supertype
 
-  // Ths check has worked decisively for primary supers.
+  // This check has worked decisively for primary supers.
   // Secondary supers are sought in the super_cache ('super_cache_addr').
   // (Secondary supers are interfaces and very deeply nested subtypes.)
   // This works in the same check above because of a tricky aliasing
-  // between the super_Cache and the primary super dispaly elements.
+  // between the super_Cache and the primary super display elements.
   // (The 'super_check_addr' can address either, as the case requires.)
   // Note that the cache is updated below if it does not help us find
   // what we need immediately.
@@ -2581,7 +2587,7 @@ void MacroAssembler::check_klass_subtype_fast_path(Register sub_klass,
 #undef final_jmp
 }
 
-// Scans count pointer sized words at [addr] for occurence of value,
+// Scans count pointer sized words at [addr] for occurrence of value,
 // generic
 void MacroAssembler::repne_scan(Register addr, Register value, Register count,
                                 Register tmp) {
@@ -2615,7 +2621,7 @@ void MacroAssembler::check_klass_subtype_slow_path(Register sub_klass,
 
   assert(label_nulls <= 1, "at most one NULL in the batch");
 
-  // A couple of usefule fields in sub_klass:
+  // A couple of useful fields in sub_klass:
   int ss_offset = in_bytes(Klass::secondary_supers_offset());
   int sc_offset = in_bytes(Klass::secondary_super_cache_offset());
   Address secondary_supers_addr(sub_klass, ss_offset);
@@ -2626,7 +2632,7 @@ void MacroAssembler::check_klass_subtype_slow_path(Register sub_klass,
   // Do a linear scan of the secondary super-klass chain.
   // This code is rarely used, so simplicity is a virtue here.
   // The repne_scan instruction uses fixed registers, which we must spill.
-  // Don't worry too much about pre-existing connecitons with the input regs.
+  // Don't worry too much about pre-existing connections with the input regs.
 
   assert(sub_klass != x10, "killed reg"); // killed by mv(x10, super)
   assert(sub_klass != x12, "killed reg"); // killed by la(x12, &pst_counter)
@@ -3150,7 +3156,7 @@ address MacroAssembler::emit_trampoline_stub(int insts_call_instruction_offset,
   // instructions code-section.
 
   // make sure 4 byte aligned here, so that the destination address would be
-  // 8 byte aligned after 3 intructions
+  // 8 byte aligned after 3 instructions
   // when we reach here we may get a 2-byte alignment so need to align it
   align(wordSize, NativeCallTrampolineStub::data_offset);
 
@@ -3262,7 +3268,7 @@ void MacroAssembler::compute_match_mask(Register src, Register pattern, Register
 }
 
 #ifdef COMPILER2
-// Code for BigInteger::mulAdd instrinsic
+// Code for BigInteger::mulAdd intrinsic
 // out     = x10
 // in      = x11
 // offset  = x12  (already out.length-offset)
