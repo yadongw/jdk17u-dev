@@ -85,9 +85,11 @@ static void pass_arg3(MacroAssembler* masm, Register arg) {
   }
 }
 
-void MacroAssembler::align(int modulus, int extra_offset) {
+int MacroAssembler::align(int modulus, int extra_offset) {
   CompressibleRegion cr(this);
+  intptr_t before = offset();
   while ((offset() + extra_offset) % modulus != 0) { nop(); }
+  return (int)(offset() - before);
 }
 
 void MacroAssembler::call_VM_helper(Register oop_result, address entry_point, int number_of_arguments, bool check_exceptions) {
@@ -3064,13 +3066,19 @@ address MacroAssembler::trampoline_call(Address entry, CodeBuffer* cbuf) {
     }
   }
 
-  if (cbuf != NULL) { cbuf->set_insts_mark(); }
-  relocate(entry.rspec());
-  if (!far_branches()) {
-    jal(entry.target());
-  } else {
-    jal(pc());
+  address call_pc = pc();
+#ifdef ASSERT
+  if (entry.rspec().type() != relocInfo::runtime_call_type) {
+    assert_alignment(call_pc);
   }
+#endif
+  relocate(entry.rspec());
+   if (!far_branches()) {
+     jal(entry.target());
+   } else {
+     jal(pc());
+   }
+
   // just need to return a non-null address
   postcond(pc() != badAddress);
   return pc();
