@@ -235,6 +235,8 @@ void BarrierSetAssembler::nmethod_entry_barrier(MacroAssembler* masm) {
   // RISCV atomic operations require that the memory address be naturally aligned.
   __ align(4);
 
+  Assembler::IncompressibleRegion ir(masm);  // Fixed length: see entry_barrier_offset()
+
   Label skip, guard;
   Address thread_disarmed_addr(xthread, in_bytes(bs_nm->thread_disarmed_offset()));
 
